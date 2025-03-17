@@ -10,13 +10,12 @@ from telegram_bot.states import SearchState
 
 router = Router()
 
-tags_handler = Problems(name_column="name", name_table="tags")
-rating_handler = Problems(name_column="rating", name_table="problems")
+prob = Problems()
 
 
 @router.message(F.text == "🔍 Поиск задач")
 async def search(message: Message, state: FSMContext):
-    tags = await tags_handler.get_items()
+    tags = await prob.get_tags()
     keyboard = create_keyboard(tags)
 
     await state.set_state(SearchState.waiting_for_tags)
@@ -27,7 +26,9 @@ async def search(message: Message, state: FSMContext):
 async def search__by_tags(message: Message, state: FSMContext):
     await state.update_data(waiting_for_tags=message.text)
 
-    ratings = await rating_handler.get_items()
+    state_data = await state.get_data()
+
+    ratings = await prob.get_rating(state_data.get('waiting_for_tags'))
     keyboard = create_keyboard(ratings)
 
     await state.set_state(SearchState.waiting_for_rating)
