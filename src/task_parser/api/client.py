@@ -1,3 +1,5 @@
+import logging
+
 import httpx
 
 
@@ -13,10 +15,15 @@ class APIClient:
             async with httpx.AsyncClient() as client:
                 response = await client.get(self.url)
                 response.raise_for_status()
-                return response.json().get('result', {})
+                response_json = response.json()
+                if 'result' in response_json:
+                    return response_json['result'] # Если в ответе есть 'result', возвращаем его
+                else:
+                    logging.error('Данных в result для поиска нет')
+                    return {}  # Возвращаем пустой словарь, если 'result' нет
         except httpx.RequestError as e:
-            print(f'Ошибка при запросе к API: {e}')
-            return {}
+            logging.error(f'Ошибка при запросе к API: {e}')
+            return {} # Возвращаем пустой словарь в случае ошибки запроса
 
     async def get_problems(self):
         """Возвращает список задач"""
