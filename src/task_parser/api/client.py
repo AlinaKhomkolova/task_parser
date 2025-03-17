@@ -2,6 +2,10 @@ import logging
 
 import httpx
 
+# Настройка логирования
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 class APIClient:
     """Отвечает за отправку запросов к API и получение данных."""
@@ -17,13 +21,13 @@ class APIClient:
                 response.raise_for_status()
                 response_json = response.json()
                 if 'result' in response_json:
-                    return response_json['result'] # Если в ответе есть 'result', возвращаем его
+                    return response_json['result']  # Если в ответе есть 'result', возвращаем его
                 else:
-                    logging.error('Данных в result для поиска нет')
+                    logging.warning('Данных для поиска в result нет')
                     return {}  # Возвращаем пустой словарь, если 'result' нет
         except httpx.RequestError as e:
             logging.error(f'Ошибка при запросе к API: {e}')
-            return {} # Возвращаем пустой словарь в случае ошибки запроса
+            return {}  # Возвращаем пустой словарь в случае ошибки запроса
 
     async def get_problems(self):
         """Возвращает список задач"""

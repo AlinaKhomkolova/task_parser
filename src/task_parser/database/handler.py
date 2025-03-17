@@ -1,7 +1,12 @@
+import logging
 from typing import Optional
 
 import asyncpg
 from psycopg2 import Error, OperationalError
+
+# Настройка логирования
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class DatabaseHandler:
@@ -23,24 +28,22 @@ class DatabaseHandler:
         try:
             dsn = f"postgresql://{self.db_config['user']}:{self.db_config['password']}@{self.db_config['host']}:{self.db_config['port']}/{self.db_config['dbname']}"
             self.conn = await asyncpg.connect(dsn)
-            print('Подключение к базе данных успешно')
+            logger.info('Подключение к базе данных успешно')
         except OperationalError as e:
-            print(f'Ошибка подключения к базе данных: {e}')
+            logger.error(f'Ошибка подключения к базе данных: {e}')
 
     async def close(self):
         """Закрывает соединение с базой данных"""
         if self.conn:
             await self.conn.close()
-            print('Соединение с базой данных закрыто')
+            logger.info('Соединение с базой данных закрыто')
 
     async def execute_query(self, query: str, params: Optional[tuple] = None):
         """Выполняет SQL-запрос без возврата данных (INSERT, UPDATE, DELETE)."""
         try:
             await self.conn.execute(query, *params)
-            # self.conn.commit()
         except Error as e:
-            # self.conn.rollback()
-            print(f"Ошибка выполнения запроса: {e}")
+            logger.error(f"Ошибка выполнения запроса: {e}")
 
     async def fetch_query(self, query: str, params: Optional[tuple] = None):
         """Выполняет SQL-запрос и возвращает данные (SELECT)."""
@@ -50,7 +53,7 @@ class DatabaseHandler:
             result = await self.conn.fetch(query, *params)
             return result
         except Exception as e:
-            print(f"Ошибка выполнения SELECT-запроса: {e}")
+            logger.error(f"Ошибка выполнения SELECT-запроса: {e}")
             return []
 
     async def fetch_one(self, query: str, params: Optional[tuple] = None):
@@ -59,5 +62,5 @@ class DatabaseHandler:
             result = await self.conn.fetchrow(query, *params)
             return result
         except Exception as e:
-            print(f"Ошибка выполнения SELECT-запроса: {e}")
+            logger.error(f"Ошибка выполнения SELECT-запроса: {e}")
             return None
