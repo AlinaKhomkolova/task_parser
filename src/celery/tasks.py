@@ -1,6 +1,6 @@
 import asyncio
 
-from settings import URL, db_config
+from settings import URL
 from src.celery.celery import app
 from src.task_parser.api.client import APIClient
 from src.task_parser.database.handler import DatabaseHandler
@@ -12,7 +12,7 @@ def fetch_codeforces_data():
     """Парсит данные с Codeforces и обрабатывает их"""
     try:
         async def process():
-            db = DatabaseHandler(db_config)
+            db = DatabaseHandler()
             api = APIClient(URL)
             problem = ProblemProcessor(db_handler=db, api_client=api)
 

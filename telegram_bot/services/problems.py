@@ -1,10 +1,9 @@
-from settings import db_config
 from src.task_parser.database.handler import DatabaseHandler
 
 
 class Problems:
     def __init__(self):
-        self.db = DatabaseHandler(db_config)
+        self.db = DatabaseHandler()
 
     async def get_tags(self):
         async with self.db as db:

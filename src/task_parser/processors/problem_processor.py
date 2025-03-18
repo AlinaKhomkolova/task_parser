@@ -9,7 +9,6 @@ class ProblemProcessor:
         """Сохраняет уникальные теги(темы)"""
         tags = await self.api_client.get_unique_tags()
         for tag in tags:
-
             await  self.db_handler.execute_query(
                 """
                 INSERT INTO tags (name)

@@ -2,7 +2,6 @@ from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from settings import db_config
 from src.task_parser.database.handler import DatabaseHandler
 from telegram_bot.keyboards import create_keyboard
 from telegram_bot.services.problems import Problems
@@ -38,7 +37,7 @@ async def search__by_tags(message: Message, state: FSMContext):
 @router.message(SearchState.waiting_for_rating)
 async def search_by_rating(message: Message, state: FSMContext):
     await state.update_data(waiting_for_rating=message.text)
-    db = DatabaseHandler(db_config)
+    db = DatabaseHandler()
     state_data = await state.get_data()
     tag_name = state_data.get('waiting_for_tags')
     rating = int(state_data.get('waiting_for_rating'))
