@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     TOKEN: str
 
     @property
-    async def database_url_asyncpg(self) -> str:
+    def database_url_asyncpg(self) -> str:
         """
         Возвращает DSN-строку для подключения через asyncpg (используется в SQLAlchemy).
         Формат:
@@ -26,7 +26,7 @@ class Settings(BaseSettings):
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
     @property
-    async def database_url_postgres(self) -> str:
+    def database_url_postgres(self) -> str:
         """
         Возвращает DSN-строку для прямого подключения через asyncpg.
         Формат:
@@ -35,11 +35,11 @@ class Settings(BaseSettings):
         return f"postgresql://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
     @property
-    async def url_for_parser(self) -> str:
+    def url_for_parser(self) -> str:
         return f"{self.URL}"
 
     @property
-    async def token_for_bot(self) -> str:
+    def token_for_bot(self) -> str:
         return f"{self.TOKEN}"
 
     class Config:

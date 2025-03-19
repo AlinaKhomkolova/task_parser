@@ -2,9 +2,8 @@ import logging
 from typing import Optional
 
 import asyncpg
-from psycopg2 import Error, OperationalError
 
-from src.task_parser.config import settings
+from config import settings
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -28,10 +27,10 @@ class DatabaseHandler:
     async def connect(self):
         """Устанавливает соединение с базой данных"""
         try:
-            dsn = await settings.database_url_postgres
+            dsn = settings.database_url_postgres
             self.conn = await asyncpg.connect(dsn)
             logger.info('Подключение к базе данных успешно')
-        except OperationalError as e:
+        except Exception as e:
             logger.error(f'Ошибка подключения к базе данных: {e}')
 
     async def close(self):
@@ -44,7 +43,7 @@ class DatabaseHandler:
         """Выполняет SQL-запрос без возврата данных (INSERT, UPDATE, DELETE)."""
         try:
             await self.conn.execute(query, *params)
-        except Error as e:
+        except Exception as e:
             logger.error(f"Ошибка выполнения запроса: {e}")
 
     async def fetch_query(self, query: str, params: Optional[tuple] = None):

@@ -2,7 +2,7 @@ import asyncio
 
 from src.celery.celery import app
 from src.task_parser.api.client import APIClient
-from src.task_parser.config import settings
+from config import settings
 from src.task_parser.database.handler import DatabaseHandler
 from src.task_parser.processors.problem_processor import ProblemProcessor
 
@@ -13,7 +13,7 @@ def fetch_codeforces_data():
     try:
         async def process():
             db = DatabaseHandler()
-            dsn = await settings.url_for_parser
+            dsn = settings.url_for_parser
             api = APIClient(dsn)
             problem = ProblemProcessor(db_handler=db, api_client=api)
 

@@ -4,12 +4,13 @@ import subprocess
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 
-from src.task_parser.config import settings
+from config import settings
+from telegram_bot.queries.engine import create_table, drop_table
 from telegram_bot.routers import register_routers
 
 
 async def get_token():
-    dsn = await settings.token_for_bot
+    dsn = settings.token_for_bot
     bot = Bot(token=dsn)
     return bot
 
@@ -20,6 +21,8 @@ dp = Dispatcher(storage=storage)
 
 async def main():
     register_routers(dp)
+    await drop_table()
+    await create_table()
     await dp.start_polling(await get_token())
 
 
@@ -32,7 +35,6 @@ def run_celery():
 async def run_celery_and_bot():
     # Запуск Celery в фоновом режиме
     run_celery()
-
     await main()
 
 
