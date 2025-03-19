@@ -4,7 +4,7 @@ from typing import Optional
 import asyncpg
 from psycopg2 import Error, OperationalError
 
-from src.task_parser.database.config import settings
+from src.task_parser.config import settings
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)

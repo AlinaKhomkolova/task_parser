@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     DB_PASS: str
     DB_NAME: str
 
+    URL: str
+    TOKEN: str
+
     @property
     async def database_url_asyncpg(self) -> str:
         """
@@ -30,6 +33,14 @@ class Settings(BaseSettings):
         postgresql://user:password@host:port/dbname
         """
         return f"postgresql://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+
+    @property
+    async def url_for_parser(self) -> str:
+        return f"{self.URL}"
+
+    @property
+    async def token_for_bot(self) -> str:
+        return f"{self.TOKEN}"
 
     class Config:
         env_file = '.env'
