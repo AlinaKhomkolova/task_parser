@@ -8,16 +8,21 @@ class ProblemProcessor:
     async def save_tags(self):
         """Сохраняет уникальные теги(темы)"""
         tags = await self.api_client.get_unique_tags()
-        for tag in tags:
-            await  self.db_handler.execute_query(
-                """
-                INSERT INTO tags (name)
-                VALUES ($1)
-                ON CONFLICT (name) DO NOTHING;
-                """,
-                (tag,)
-            )
-        print('Данные о тегах успешно записаны')
+
+        # Создание списка словарей для вставки
+        tag_objects = [{'name': tag} for tag in tags]
+
+        # Вставка с игнорированием дублирующихся значений
+        stmt = insert(Tags).values(tag_objects)
+        stmt = stmt.on_conflict_do_nothing(index_elements=['name'])  # Игнорируем конфликты
+
+        try:
+            await self.db_session.execute(stmt)
+            await self.db_session.commit()
+            print('Данные о тегах успешно записаны')
+        except IntegrityError:
+            await self.db_session.rollback()
+            logging.error("Ошибка при добавлении тега.")
 
     async def save_problems(self):
         """Сохраняет задачи"""
