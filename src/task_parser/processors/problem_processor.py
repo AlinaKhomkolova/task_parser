@@ -1,8 +1,8 @@
 class ProblemProcessor:
     """Обрабатывает полученные данные и сохраняет их в базу данных."""
 
-    def __init__(self, db_handler, api_client):
-        self.db_handler = db_handler
+    def __init__(self, db_session: AsyncSession, api_client):
+        self.db_session = db_session
         self.api_client = api_client
 
     async def save_tags(self):
