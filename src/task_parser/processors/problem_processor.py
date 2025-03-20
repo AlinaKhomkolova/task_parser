@@ -1,3 +1,13 @@
+import logging
+
+from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+
+from telegram_bot.queries.models import Tags, Problems, ProblemsTags
+
+
 class ProblemProcessor:
     """Обрабатывает полученные данные и сохраняет их в базу данных."""
 
@@ -22,25 +32,38 @@ class ProblemProcessor:
             print('Данные о тегах успешно записаны')
         except IntegrityError:
             await self.db_session.rollback()
-            logging.error("Ошибка при добавлении тега.")
+            logging.error("Ошибка при добавлении тегов.")
 
     async def save_problems(self):
         """Сохраняет задачи"""
         problems = await self.api_client.get_problems()
+
         for problem in problems:
             contest_id = problem.get('contestId')
             index = problem.get('index')
             name = problem.get('name')
             rating = problem.get('rating')
-            await self.db_handler.execute_query(
-                """
-               INSERT INTO problems (contest_id, index, name, rating)
-               VALUES ($1, $2, $3, $4)
-               ON CONFLICT (contest_id, index) DO NOTHING;
-               """,
-                (contest_id, index, name, rating),
+
+            stmt = select(Problems).where(
+                Problems.contest_id == contest_id, Problems.index == index
             )
-        print('Данные о задачах успешно записаны')
+            check_id_index = await self.db_session.execute(stmt)
+            check_id_index = check_id_index.scalars().first()
+
+            if check_id_index:
+                check_id_index.name = name
+                check_id_index.rating = rating
+            else:
+                new_problem = Problems(contest_id=contest_id, index=index, name=name,
+                                       rating=rating)
+                self.db_session.add(new_problem)
+
+        try:
+            await self.db_session.commit()
+            print('Данные о задачах успешно записаны')
+        except IntegrityError:
+            await self.db_session.rollback()
+            logging.error(f"Ошибка при добавлении задач")
 
     async def save_problem_statistics(self):
         """Сохраняет статистику задач"""
@@ -49,15 +72,27 @@ class ProblemProcessor:
             contest_id = stat.get('contestId')
             index = stat.get('index')
             solved_count = stat.get('solvedCount', 0)
-            await self.db_handler.execute_query(
-                """
-                UPDATE problems
-                SET solved_count = $1
-                WHERE contest_id = $2 AND index = $3;
-                """,
-                (solved_count, contest_id, index),
+
+            stmt = select(Problems).where(
+                Problems.contest_id == contest_id, Problems.index == index
             )
-        print('Данные о статистике успешно записаны')
+
+            check_id_index = await self.db_session.execute(stmt)
+            check_id_index = check_id_index.scalars().first()
+
+            if check_id_index:
+                check_id_index.solved_count = solved_count
+
+            else:
+                new_problem = Problems(solved_count=solved_count)
+                self.db_session.add(new_problem)
+
+        try:
+            await self.db_session.commit()
+            print('Данные о статистике успешно записаны')
+        except IntegrityError:
+            await self.db_session.rollback()
+            logging.error(f"Ошибка при добавлении статистики")
 
     async def save_problem_tags(self):
         problems = await self.api_client.get_problems()
@@ -66,31 +101,27 @@ class ProblemProcessor:
             index = problem.get('index')
             tags = problem.get('tags', [])
 
-            # Получение ID задачи
-            problem_id = await self.db_handler.fetch_one(
-                """
-                SELECT id FROM problems WHERE contest_id = $1 AND index = $2;
-                """,
-                (contest_id, index)
-            )
+            stmt = select(Problems.id).where(Problems.contest_id == contest_id, Problems.index == index)
+
+            problem_result = await self.db_session.execute(stmt)
+            problem_id = problem_result.scalars().first()
+
             if problem_id:
                 for tag_name in tags:
-                    # Получение ID темы
-                    tag_id = await self.db_handler.fetch_one(
-                        """
-                        SELECT id FROM tags WHERE name = $1;
-                        """,
-                        (tag_name,)
-                    )
-                    if tag_id:
-                        # Сохранение в таблицу
-                        await self.db_handler.execute_query(
-                            """
-                            INSERT INTO problem_tags (problem_id, tag_id)
-                            VALUES ($1, $2)
-                            ON CONFLICT DO NOTHING;
-                            """,
-                            (problem_id[0], tag_id[0])
-                        )
+                    stmt = select(Tags.id).where(Tags.name == tag_name)
+                    tag_result = await self.db_session.execute(stmt)
+                    tag_id = tag_result.scalars().first()
 
-        print('Связи между задачами и тегами успешно сохранены')
+                    if tag_id:
+                        stmt = insert(ProblemsTags).values(
+                            problem_id=problem_id, tag_id=tag_id
+                        ).on_conflict_do_nothing()
+
+                        await self.db_session.execute(stmt)
+
+        try:
+            await self.db_session.commit()
+            print('Связи между задачами и тегами успешно сохранены')
+        except Exception as e:
+            await self.db_session.rollback()
+            print("Ошибка при создании связи между темам и задачами")
