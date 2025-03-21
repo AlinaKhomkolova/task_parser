@@ -6,10 +6,13 @@ from queries.models import Tags, ProblemsTags, Problems
 
 
 class ProblemsQueries:
+    """Класс для выполнения запросов к базе данных, связанных с задачами и тегами."""
+
     def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
 
     async def get_tags(self):
+        """Получение списка всех уникальных названий тегов из базы данных."""
         stmt = (
             select(Tags.name)
             .where(Tags.name.isnot(None))
@@ -21,6 +24,7 @@ class ProblemsQueries:
         return result.scalars().all()
 
     async def get_rating(self, tag_name):
+        """Получение всех уникальных значений рейтинга задач для заданного тега."""
         stmt = (
             select(distinct(Problems.rating))
             .join(ProblemsTags, Problems.id == ProblemsTags.problem_id)
@@ -33,6 +37,7 @@ class ProblemsQueries:
         return result.scalars().all()
 
     async def get_problem_to_criteria(self, tag_name, rating):
+        """Получение списка задач, соответствующих заданному тегу и рейтингу."""
         stmt = (
             select(Problems.name, Problems.rating, Problems.contest_id, Problems.index, Problems.solved_count,
                    Tags.name)
