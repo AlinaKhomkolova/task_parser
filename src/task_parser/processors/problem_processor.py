@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from telegram_bot.queries.models import Tags, Problems, ProblemsTags
+from queries.models import Tags, Problems, ProblemsTags
 
 
 class ProblemProcessor:

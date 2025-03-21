@@ -4,7 +4,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 
 from config import settings
-from telegram_bot.queries.engine import create_table
+from queries.engine import create_table
 from telegram_bot.routers import register_routers
 
 
