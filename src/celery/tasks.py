@@ -5,7 +5,7 @@ from config import settings
 from src.celery.celery import app
 from src.task_parser.api.client import APIClient
 from src.task_parser.processors.problem_processor import ProblemProcessor
-from telegram_bot.queries.engine import session_maker
+from queries.engine import session_maker
 
 task_lock = Lock()
 

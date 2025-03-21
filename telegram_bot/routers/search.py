@@ -4,7 +4,7 @@ from aiogram.types import Message
 
 from src.task_parser.database.handler import DatabaseHandler
 from telegram_bot.keyboards import create_keyboard
-from telegram_bot.queries.problems import Problems
+from queries.problems import Problems
 from telegram_bot.states import SearchState
 
 router = Router()

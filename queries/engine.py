@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
 from config import settings
-from telegram_bot.queries.models import Base
+from queries.models import Base
 
 engine = create_async_engine(settings.database_url_asyncpg, echo=True)
 
