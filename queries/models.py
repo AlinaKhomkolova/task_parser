@@ -26,6 +26,7 @@ class Problems(Base):
 
 class ProblemsTags(Base):
     __tablename__ = 'problem_tags'
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     problem_id: Mapped[int] = mapped_column(Integer, ForeignKey(
         'problems.id', ondelete='CASCADE'), primary_key=True)
     tag_id: Mapped[int] = mapped_column(Integer, ForeignKey(
