@@ -19,7 +19,7 @@ class APIClient:
             async with httpx.AsyncClient() as client:
                 response = await client.get(self.url)
                 response.raise_for_status()
-                response_json = response.json()
+                response_json = await response.json()
                 if 'result' in response_json:
                     return response_json['result']  # Если в ответе есть 'result', возвращаем его
                 else:

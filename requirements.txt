@@ -19,3 +19,4 @@ aiocache
 
 pytest
 pytest-asyncio
+pytest-cov
