@@ -95,6 +95,7 @@ class ProblemProcessor:
             logging.error(f"Ошибка при добавлении статистики")
 
     async def save_problem_tags(self):
+        """Сохраняет связь между задачами и тегами(темы)"""
         problems = await self.api_client.get_problems()
         for problem in problems:
             contest_id = problem.get('contestId')
